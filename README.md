@@ -9,6 +9,9 @@ Such time lag could be interpreted as the time it takes for area j to receive si
 from area i.
 
 To be included: 
+
 (1) computation of DFC using mutual information, CaMI and transfer entropy.
+
 (2) EEG pre-processing batch
+
 (3) visual output of DFC results
