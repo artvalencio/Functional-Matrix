@@ -1,4 +1,4 @@
-function [matrixcorrs,matrixlags] = functionalmatrix(data,shift,windowlen,corrtype)
+function [matrixcorrs,matrixlags] = functionalmatrix(data,shift,windowlen,step,corrtype)
 %FUNCTIONALMATRIX Retrieves the functional matrix from EEG data
 %-----------------------------------------------------------------------------------
 %Inputs
@@ -8,7 +8,10 @@ function [matrixcorrs,matrixlags] = functionalmatrix(data,shift,windowlen,corrty
 %               time-series points units
 %- windowlen:   the window length for the correlation analysis (square
 %               window)
-%- corrtype:    correlation type ('pearson', 'kendall' or 'spearman')
+%- step:        step given between calculation of correlation in one window
+%               and on the other
+%- corrtype:    correlation type ('Pearson', 'Kendall' or 'Spearman')
+%               (requires Matlab Statistics Toolbox. default: 'Pearson')
 %-----------------------------------------------------------------------------------
 %Outputs
 %- matrixcorrs: Functional matrix of correlations
@@ -24,56 +27,112 @@ function [matrixcorrs,matrixlags] = functionalmatrix(data,shift,windowlen,corrty
     
     %initializing
     n_chans=length(data(1,:));
-    n_frames=length(data(:,1));
-    matrixcorrs(1:n_chans,1:n_chans,1:n_frames)=NaN;
-    matrixlags(1:n_chans,1:n_chans,1:n_frames)=NaN;
     
-    %caluclating correlations and lags
-    for i=1:n_chans
-        for j=i:n_chans
-            [matrixcorrs(i,j,:),matrixlags(i,j,:)]=slidingcorr(data(:,i),data(:,j),shift,windowlen,corrtype);
-        end
+    %check if corrtype
+    if nargin<5
+        corrtype=0;
     end
     
+    %calculating correlations and lags
+    if and(license('test','statistics_toolbox'),corrtype~=0)
+        for i=1:n_chans
+            for j=i:n_chans
+                disp(strcat(num2str(i),',',num2str(j)))
+                [matrixcorrs(i,j,:),matrixlags(i,j,:)]=slidingcorr2(data(:,i),data(:,j),shift,windowlen,step,corrtype);
+            end
+        end
+    else 
+        for i=1:n_chans
+            for j=i:n_chans
+                disp(strcat(num2str(i),',',num2str(j)))
+                [matrixcorrs(i,j,:),matrixlags(i,j,:)]=slidingcorr(data(:,i),data(:,j),shift,windowlen,step);
+            end
+        end
+    end
     %complementing triangular matrix without re-doing calcs
     for i=1:n_chans
-       for j=1:i
+       for j=1:i-1
           matrixcorrs(i,j,:)=-matrixcorrs(j,i,:);
           matrixlags(i,j,:)=matrixlags(j,i,:);
        end
     end
 end
 
-function [corrval,lag] = slidingcorr(x,y,shift,windowlen,corrtype)
+function [corrval,lag] = slidingcorr(x,y,shift,windowlen,step)
     tslen=length(x);
     %calculates correlations:
     for shift2=-shift:shift
         if shift2>=0
-            for i=shift:tslen-windowlen-shift
-                r=corr(x(i:i+windowlen),y(i+shift2:i+shift2+windowlen),corrtype);
-                correlation(i,shift2+shift+1)=r(1,2);
+            k=0;
+            for i=shift+1:step:tslen-windowlen-shift
+                k=k+1;
+                r=corrcoef(x(i:i+windowlen),y(i+shift2:i+shift2+windowlen));
+                correlation(k,shift2+shift+1)=r(1,2);                
             end
         else
-            for i=shift:tslen-windowlen-shift
-                r=corr(x(i+shift2:i+shift2+windowlen),y(i:i+windowlen),corrtype);
-                correlation(i,shift2+shift+1)=r(1,2);
+            k=0;
+            for i=shift+1:step:tslen-windowlen-shift
+                k=k+1;
+                r=corrcoef(x(i+shift2:i+shift2+windowlen),y(i:i+windowlen));
+                correlation(k,shift2+shift+1)=r(1,2);
             end
         end
     end
     %calculates peak of correlations and respective lags:
-    doublecorr=abs(correlation);
+    abscorr=abs(correlation);
     corrlen=length(correlation(:,1));
     corrval(1:corrlen)=NaN;
-    lag(a:corrlen)=NaN;
+    lag(1:corrlen)=NaN;
     for i=1:corrlen
-        [~,lag(i)]=getpeak(doublecorr(i,:),-shift:shift);
-        corrval(i)=correlation(i,lag(i));
+        if ~isempty(find(abscorr(i,:),1)) %if correlation is not totally zero
+            [~,lag(i)]=getpeak(abscorr(i,:),-shift:shift);
+            corrval(i)=correlation(i,lag(i)+shift+1);
+        else %else correltion is zero and lag undefined
+            lag(i)=NaN;
+            corrval(i)=0;
+        end
+    end   
+end
+
+function [corrval,lag] = slidingcorr2(x,y,shift,windowlen,step,corrtype)
+    tslen=length(x);
+    %calculates correlations:
+    for shift2=-shift:shift
+        if shift2>=0
+            k=0;
+            for i=shift+1:step:tslen-windowlen-shift
+                k=k+1;
+                correlation(k,shift2+shift+1)=corr(x(i:i+windowlen),...
+                    y(i+shift2:i+shift2+windowlen),'Type',corrtype,'Rows','Pairwise');
+            end
+        else
+            k=0;
+            for i=shift+1:step:tslen-windowlen-shift
+                k=k+1;
+                correlation(k,shift2+shift+1)=corr(x(i+shift2:i+shift2+windowlen),...
+                    y(i:i+windowlen),'Type',corrtype,'Rows','Pairwise');
+            end
+        end
+    end
+    %calculates peak of correlations and respective lags:
+    abscorr=abs(correlation);
+    corrlen=length(correlation(:,1));
+    corrval(1:corrlen)=NaN;
+    lag(1:corrlen)=NaN;
+    for i=1:corrlen
+        if ~isempty(find(abscorr(i,:),1)) %if correlation is not totally zero
+            [~,lag(i)]=getpeak(abscorr(i,:),-shift:shift);
+            corrval(i)=correlation(i,lag(i)+shift+1);
+        else %else correltion is zero and lag undefined
+            lag(i)=NaN;
+            corrval(i)=0;
+        end
     end   
 end
 
 function [peak,lag]=getpeak(x,idx)
     peak=-inf;
-    for i=2:length(x)
+    for i=2:length(x)-1
        if ~isnan(x(i))
             if x(i)>peak
                 if and(x(i)>x(i-1),x(i)>x(i+1))
