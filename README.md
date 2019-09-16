@@ -8,6 +8,10 @@ between two EEG channels at a given time interval and the time lag where this pe
 Such time lag could be interpreted as the time it takes for area j to receive signal
 from area i.
 
+Use DFC to calculate the dynamic functional connectivity using correlation measures;
+
+Use DFCCAMI to calculate the dynamic functional connectivity using information-theoretical measures (CaMI,MI,TE,DI)
+
 
 In construction:
 
@@ -15,6 +19,3 @@ In construction:
 
 (2) visual output of DFC results
 
-Still testing (but available on this page):
-
-(1) DFCCAMI: for calculating the using information-theoretical measures (CaMI, MI, TE, DI)
