@@ -18,7 +18,7 @@ function [matrixcorrs,matrixlags] = dfc(data,shift,windowlen,step,corrtype)
 %               Matlab Statistics Toolbox or Octave Statistics Package. 
 %               default: 'Pearson')
 %
-%NOTE: TO USE INFORMATION MEASURES INSTEAD, USE FUNCTIONALMATRIX_CAMI
+%NOTE: TO USE INFORMATION MEASURES INSTEAD, USE DFCCAMI
 %-----------------------------------------------------------------------------------
 %Outputs
 %- matrixcorrs: Functional matrix of correlations
