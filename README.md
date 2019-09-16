@@ -3,15 +3,18 @@
 
 Calculates the dynamical functional connectivity (DFC) of brain areas given an EEG signal.
 
-Each data point gives the peak sliding window correlation between two EEG channels at
-a given time interval and the time lag where this peak correlation was found. 
+Each data point gives the peak sliding window correlation or information-theoretical measure
+between two EEG channels at a given time interval and the time lag where this peak is found. 
 Such time lag could be interpreted as the time it takes for area j to receive signal
 from area i.
 
-To be included: 
 
-(1) computation of DFC using mutual information, CaMI and transfer entropy.
+In construction:
 
-(2) EEG pre-processing batch
+(1) EEG pre-processing batch
 
-(3) visual output of DFC results
+(2) visual output of DFC results
+
+Still testing (but available on this page):
+
+(1) DFCCAMI: for calculating the using information-theoretical measures (CaMI, MI, TE, DI)
