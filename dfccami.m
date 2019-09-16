@@ -44,7 +44,7 @@ function [cami_xy,cami_yx,mutual_info,diridx,te_xy,te_yx] = ...
 %- .lag:        the time-delay where this maximal absolute value is found
 %-----------------------------------------------------------------------------------
 %Usage example
-%[cami_xy,cami_yx,mutual_info,diridx,te_xy,te_yx] = dfccami(eeg,20,1000,1,-60:10:60,1)
+%[cami_xy,cami_yx,mutual_info,diridx,te_xy,te_yx] = dfccami(eeg,20,1000,10,-60:10:60,1,'bits')
 %-----------------------------------------------------------------------------------
 %  (CC-BY-4.0) Arthur Valencio
 %  Institute of Computing, State University of Campinas
@@ -57,31 +57,19 @@ function [cami_xy,cami_yx,mutual_info,diridx,te_xy,te_yx] = ...
     %find appropriate Taken's theorem tau of the system (zero autocorrelation)
     tau=findtau(data,n_chans);
     
+    disp('Calculating for electrode pair x,y:');
+    
     %calculating values and lags
     for i=1:n_chans
         for j=1:n_chans
-            if i==j
-                cami_xy.value=NaN;   
-                cami_yx.value=NaN;    
-                mutual_info.value=NaN;
-                diridx.value=NaN;
-                te_xy.value=NaN;
-                te_yx.value=NaN;
-                cami_xy.lag=NaN;   
-                cami_yx.lag=NaN;    
-                mutual_info.lag=NaN;
-                diridx.lag=NaN;
-                te_xy.lag=NaN;
-                te_yx.lag=NaN;
-            else
+            if i~=j
                 disp(strcat(num2str(i),',',num2str(j)))
                 selecttau=max(tau(i),tau(j));
-                [cami_xy,cami_yx,mutual_info,diridx,te_xy,te_yx]=...
+                [cami_xy{i,j},cami_yx{i,j},mutual_info{i,j},diridx{i,j},te_xy{i,j},te_yx{i,j}]=...
                     slidingcorr(data(:,i),data(:,j),shift,windowlen,step,selecttau,ini_part,L,units);
             end
         end
     end
-
 end
 
 function [cami_xy,cami_yx,mutual_info,diridx,te_xy,te_yx] = ...
@@ -112,23 +100,28 @@ function [cami_xy,cami_yx,mutual_info,diridx,te_xy,te_yx] = ...
         end
     end
     %calculates peak of measures and respective lags:
-    cami_xy=calcpeak(cami_xyval);
-    cami_yx=calcpeak(cami_yxval);    
-    mutual_info=calcpeak(mutual_infoval);
-    diridx=calcpeak(diridxval);
-    te_xy=calcpeak(te_xyval);
-    te_yx=calcpeak(te_yxval);   
+    cami_xy=calcpeak(cami_xyval,shift);
+    cami_yx=calcpeak(cami_yxval,shift);    
+    mutual_info=calcpeak(mutual_infoval,shift);
+    diridx=calcpeak(diridxval,shift);
+    te_xy=calcpeak(te_xyval,shift);
+    te_yx=calcpeak(te_yxval,shift);   
 end
 
-function out=calcpeak(x)
+function out=calcpeak(x,shift)
     absx=abs(x);
     xlen=length(x(:,1));
     xval(1:xlen)=NaN;
     lag(1:xlen)=NaN;
     for i=1:xlen
         if ~isempty(find(absx(i,:),1)) %if measure is not totally zero
+            %try
             [~,lag(i)]=getpeak(absx(i,:),-shift:shift);
             xval(i)=x(i,lag(i)+shift+1);
+            %catch
+            %    lag(i)=NaN;
+            %    xval(i)=NaN;
+            %end
         else %else measure is zero and lag undefined
             lag(i)=NaN;
             xval(i)=0;
@@ -140,23 +133,19 @@ end
 
 function [peak,lag]=getpeak(x,idx)
 %find peak of absolute value of correlation within -shift:shift interval
-    peak=-inf;
-    for i=2:length(x)-1
-       if ~isnan(x(i))
-            if x(i)>peak
-                if and(x(i)>x(i-1),x(i)>x(i+1))
-                    peak=x(i);
-                    lag=idx(i);
-                end
-            end
-       end
+    if idx==0
+        peak=x;
+        lag=0;
+    else
+        [peak,index]=max(x);
+        lag=idx(index);
     end
 end
 
 function tau=findtau(x,n_chans)
     for chan=1:n_chans
         for i=1:1000
-            r=corrcoef(x(1:end-i),x(i:end));
+            r=corrcoef(x(1:end-i,chan),x(i+1:end,chan));
             corrval(i,chan)=r(1,2);
         end
         tau(chan)=find(corrval(:,chan)<=0,1);

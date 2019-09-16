@@ -153,13 +153,13 @@ function [cami_xy,cami_yx,mutual_info,diridx,te_xy,te_yx,pointwise]...
             t=t+1;
         end
     else %Calculation over the whole time-series ('global' measures)
-        disp('Calculating')
+        %disp('Calculating')
         try
         fflush(stdout)
         catch
         end
         [cami_xy,cami_yx,mutual_info,diridx,te_xy,te_yx,pointwise] = main(cause,effect,lx,ly,cause_part,effect_part,tau,units,ns,print);
-        disp('done')
+        %disp('done')
     end
     
 end
