@@ -25,7 +25,7 @@ function [matrixcorrs,matrixlags] = dfc(data,shift,windowlen,step,corrtype)
 %- matrixlags:  Matrix of lags to which peak correlations were found
 %-----------------------------------------------------------------------------------
 %Usage example
-%[matrixcorrs,matrixlags] = functionalmatrix(data,20,250,1,'Pearson')
+%[matrixcorrs,matrixlags] = dfc(data,20,250,1,'Pearson')
 %-----------------------------------------------------------------------------------
 %  (CC-BY-4.0) Arthur Valencio
 %  Institute of Computing, State University of Campinas
@@ -114,29 +114,30 @@ function [corrval,lag] = slidingcorr(x,y,shift,windowlen,step)
     for shift2=-shift:shift
         if shift2>=0
             k=0;
+            %disp(tslen-windowlen-shift)
             for i=shift+1:step:tslen-windowlen-shift
                 k=k+1;
                 r=corrcoef(x(i:i+windowlen),y(i+shift2:i+shift2+windowlen));
-                correlation(k,shift2+shift+1)=r(1,2);                
+                correl(k,shift2+shift+1)=r(1,2);                
             end
         else
             k=0;
             for i=shift+1:step:tslen-windowlen-shift
                 k=k+1;
                 r=corrcoef(x(i+shift2:i+shift2+windowlen),y(i:i+windowlen));
-                correlation(k,shift2+shift+1)=r(1,2);
+                correl(k,shift2+shift+1)=r(1,2);
             end
         end
     end
     %calculates peak of correlations and respective lags:
-    abscorr=abs(correlation);
-    corrlen=length(correlation(:,1));
+    abscorr=abs(correl);
+    corrlen=length(correl(:,1));
     corrval(1:corrlen)=NaN;
     lag(1:corrlen)=NaN;
     for i=1:corrlen
         if ~isempty(find(abscorr(i,:),1)) %if correlation is not totally zero
             [~,lag(i)]=getpeak(abscorr(i,:),-shift:shift);
-            corrval(i)=correlation(i,lag(i)+shift+1);
+            corrval(i)=correl(i,lag(i)+shift+1);
         else %else correltion is zero and lag undefined
             lag(i)=NaN;
             corrval(i)=0;
