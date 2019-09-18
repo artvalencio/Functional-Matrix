@@ -32,7 +32,7 @@ function [links,lags,ds1]=dfcplot(eegdata,chanlocs,shift,windowlen,step,dfctype,
 %time interval
 %-----------------------------------------------------------------------------------
 %Usage example
-%[links,lags]=dfcplot(eeg,chanlocs,20,1000,30,100,'pearson',0.75)
+%[links,lags,ds1]=dfcplot(EEG,EEG.chanlocs,20,10000,500,'Pearson',0.9);
 %-----------------------------------------------------------------------------------
 %  (CC-BY-4.0) Arthur Valencio
 %  Institute of Computing, State University of Campinas
@@ -66,16 +66,19 @@ if ~or(strcmp(dfctype,'info'),strcmp(dfctype,'Info'))
        if i==nfigs %last set of (up to) 16 plots
             for j=1:ngrid
                 k=k+1;
-                subplot(3,3,j);
-                ds1(k)=topolink(abslinks(k,:,:),chanlocs);
-                title(strcat('t=',num2str(times(k,1),'%.0f'),'-',num2str(times(k,2),'%.0f'),'s'));
+                try
+                    subplot(3,3,j);
+                    ds1(k)=topolink(abslinks(k,:,:),chanlocs);
+                    title(strcat('t=',num2str(times(k,1),'%.0f'),'-',num2str(times(k,2),'%.0f'),'s'));
+                catch
+                end
             end
        else %other sets of 16 plots
-            for j=1:16
+            for j=1:9
                 k=k+1;
                 subplot(3,3,j);
                 ds1(k)=topolink(abslinks(k,:,:),chanlocs);
-                title(strcat('t=',num2str(times(k,1),'%.0f'),'-',num2str(times(k,2)),'%.0f','s'));
+                title(strcat('t=',num2str(times(k,1),'%.0f'),'-',num2str(times(k,2),'%.0f'),'s'));
             end
        end
     end
