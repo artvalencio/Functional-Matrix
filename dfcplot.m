@@ -64,14 +64,11 @@ if ~or(strcmp(dfctype,'info'),strcmp(dfctype,'Info'))
     for i=1:nfigs
        figure
        if i==nfigs %last set of (up to) 16 plots
-            for j=1:ngrid
+            for j=1:ngrid-1
                 k=k+1;
-                try
-                    subplot(3,3,j);
-                    ds1(k)=topolink(abslinks(k,:,:),chanlocs);
-                    title(strcat('t=',num2str(times(k,1),'%.0f'),'-',num2str(times(k,2),'%.0f'),'s'));
-                catch
-                end
+                subplot(3,3,j);
+                ds1(k)=topolink(abslinks(k,:,:),chanlocs);
+                title(strcat('t=',num2str(times(k,1),'%.0f'),'-',num2str(times(k,2),'%.0f'),'s'));
             end
        else %other sets of 16 plots
             for j=1:9
@@ -213,7 +210,7 @@ for i=1:nchans
     end
 end
 
-%Calls Namburi's draing function
+%Calls Namburi's drawing function
 topoplot_connect(ds,chanlocs);
 
 end
