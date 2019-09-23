@@ -23,9 +23,3 @@ EEGLAB: https://sccn.ucsd.edu/eeglab/index.php
 Connected Topoplot: https://www.mathworks.com/matlabcentral/fileexchange/32563-connected-topoplot?focused=5196939&tab=function
 
 -----------------------------------------------------------------
-In construction:
-
-(1) EEG pre-processing batch
-
-(2) visual output of DFC results
-
