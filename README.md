@@ -15,6 +15,10 @@ Use DFC to calculate the dynamic functional connectivity using correlation measu
 
 Use DFCCAMI to calculate the dynamic functional connectivity using information-theoretical measures (CaMI,MI,TE,DI)
 
+---------------------------------------------------------------
+*Extra*:
+The folder PREPROCESS contains functions for pre-processing EEG data considering experiment with 10:20 system
+
 ----------------------------------------------------------------
 REQUIREMENTS: 
 
