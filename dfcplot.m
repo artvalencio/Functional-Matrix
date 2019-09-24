@@ -62,7 +62,7 @@ k=0;
 if ~or(strcmp(dfctype,'info'),strcmp(dfctype,'Info'))
     abslinks=abs(links);
     for i=1:nfigs
-       figure
+       h(i)=figure('visible','off');
        if i==nfigs %last set of (up to) 16 plots
             for j=1:ngrid-1
                 k=k+1;
@@ -78,11 +78,12 @@ if ~or(strcmp(dfctype,'info'),strcmp(dfctype,'Info'))
                 title(strcat('t=',num2str(times(k,1),'%.0f'),'-',num2str(times(k,2),'%.0f'),'s'));
             end
        end
+       print(h(i),strcat('DFC_fig_',num2str(i)),'-djpeg');
     end
 else
     for type=1:6 %different figures for each information measure
         for i=1:nfigs
-           figure
+           h(i)=figure('visible','off');
            if i==nfigs %last set of (up to) 16 plots
                 for j=1:ngrid
                     k=k+1;
@@ -98,21 +99,22 @@ else
                     title(strcat('t=',num2str(times(k,1),'%.0f'),'-',num2str(times(k,2),'%.0f'),'s'));
                 end
            end
+                   %gives a title to figure indicating which information measure it refers to
+            if type==1
+                sgtitle('CaMI X\rightarrow Y');
+            elseif type==2
+                sgtitle('CaMI Y\rightarrow X');
+            elseif type==3
+                sgtitle('Mutual Information');
+            elseif type==4
+                sgtitle('Transfer Entropy X\rightarrow Y');
+            elseif type==5
+                sgtitle('Transfer Entropy Y\rightarrow X');
+            elseif type==6
+                sgtitle('Directionality Index');
+            end 
+        print(h(i),strcat('DFC_infotype_',num2str(type),'_fig_',num2str(i)),'-djpeg');
         end
-        %gives a title to figure indicating which information measure it refers to
-        if type==1
-            sgtitle('CaMI X\rightarrow Y');
-        elseif type==2
-            sgtitle('CaMI Y\rightarrow X');
-        elseif type==3
-            sgtitle('Mutual Information');
-        elseif type==4
-            sgtitle('Transfer Entropy X\rightarrow Y');
-        elseif type==5
-            sgtitle('Transfer Entropy Y\rightarrow X');
-        elseif type==6
-            sgtitle('Directionality Index');
-        end 
     end
 end
 

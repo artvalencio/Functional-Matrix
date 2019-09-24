@@ -239,15 +239,17 @@ end
 
 function [peak,lag]=getpeak(x,idx)
 %find peak of absolute value of correlation within -shift:shift interval
-    peak=-inf;
-    for i=2:length(x)-1
-       if ~isnan(x(i))
-            if x(i)>peak
-                if and(x(i)>x(i-1),x(i)>x(i+1))
-                    peak=x(i);
-                    lag=idx(i);
-                end
-            end
-       end
-    end
+   % peak=-inf;
+  %  for i=2:length(x)-1
+  %     if ~isnan(x(i))
+   %         if x(i)>peak
+   %             if and(x(i)>x(i-1),x(i)>x(i+1))
+  %                  peak=x(i);
+    %                lag=idx(i);
+  %              end
+   %        end
+  %     end%  end
+  
+  [peak,i]=max(x);
+  lag=idx(i);
 end
