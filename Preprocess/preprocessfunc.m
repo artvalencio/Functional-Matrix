@@ -1,4 +1,4 @@
-function [EEG,pulse,marker]=preprocessfunc(filename,chanlocs)
+function [EEG,pulse,resp,marker]=preprocessfunc(filename,chanlocs)
 %PREPROCESSFUNC EEG pre-processing function for analysis with NeuroMat-HC experiment data
 %Requires EEGLAB
 %----------------------------------------
@@ -24,6 +24,7 @@ eeglab redraw;
 %import EEG data
 EEG=pop_biosig(filename,'channels',1:19);
 pulse=pop_biosig(filename,'channels',27);
+resp=pop_biosig(filename,'channels',32);
 %get marker of visual stimulus
 marker=pop_biosig(filename,'channels',36);
 a=zeros(1,length(marker.data));
@@ -62,6 +63,7 @@ if ~isempty(time)
         EEG=pop_select(EEG,'notime',time);
         marker=pop_select(marker,'notime',time);
         pulse=pop_select(pulse,'notime',time);
+        resp=pop_select(resp,'notime',time);
 end
 %import electrode positions
 EEG=pop_chanedit(EEG,'load',chanlocs);
